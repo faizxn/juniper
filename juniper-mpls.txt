@@ -1,0 +1,91 @@
+
+
+	run show route table mpls.0			<--mpls lable table
+	run show route table inet.3			<--mpls forwarding table
+	run show ldp neighbor
+	run show ldp database
+	
+	run show protocol mpls | ldp
+	run show ldp session
+	
+	run show route bgp.l3vpn.0
+	run ping 45.248.148.1 routing-instance RED/GREEN
+
+---configure MPLS and LDP on PE and P routers--------------------------------------------------
+ 
+ 
+	set interface em0 mtu 1600
+	set interface em0 unit 100 family mpls mtu 1532
+	set interface em0 unit 200 family mpls mtu 1532
+	
+	set interface em0 unit 100 family mpls
+	set interface em0 unit 200 family mpls
+	set interface lo0 unit 0 family mpls
+or	
+	set protocol mpls interface em0.100
+	set protocol mpls interface em0.200
+	set protocol mpls interface lo0.0
+
+	set protocol ldp interface em0.100
+	set protocol ldp interface em0.200
+	set protocol ldp interface lo0.0
+	
+	set protocols mpls icmp-tunneling 
+	set protocols mpls icmp-tunneling 									<!--run it to all mpls-routers
+	set protocols mpls icmp-tunneling 
+
+
+
+----enable MP-BGP VPNv4 address-family on PE/P routers------------------------------------------- 
+
+	set protocol bgp group iBGP family inet any							<--ipv4-unicast-multicast
+	set protocol bgp group iBGP family inet-vpn any						<--vpn4
+	
+	set protocol bgp group iBGP family inet6 any						<--ipv6-unicast-multicast
+	set protocol bgp group iBGP family inet6-vpn any					<--vpn6	
+	
+
+
+---configure VRF instance on PE routers where customers is connected-----------------------------
+
+	set routing-instance RED instance-type vrf
+	set routing-instance RED interface em0.100
+	set routing-instance RED route-distinguisher 134732:1001
+	set routing-instance RED route-target target:134732:1001
+	set routing-instance RED vrf-table-label
+	
+	set interface em0 unit 100 description CE-PE
+	set interface em0 unit 100 family inet address 10.0.0.1/30
+	set interface em0 unit 100 family inet6 address 2401:8d::1/126
+	
+	
+	
+---adding PE-CE eBGP neighbor in VRF on PE /L3VPN------------------------------------------------------
+
+	set routing-instance RED protocol bgp group PE-CE type external
+	set routing-instance RED protocol bgp group PE-CE neighbor 10.0.0.2 description PE-CE
+	set routing-instance RED protocol bgp group PE-CE neighbor 10.0.0.2 local-neighbor 10.0.0.1
+	set routing-instance RED protocol bgp group PE-CE neighbor 10.0.0.2 peer-as 10075
+	
+	
+	set routing-instance RED vrf-import IMPORT-RED							<--if we want to filter-l3vpn-routes
+	set routing-instance RED vrf-export EXPORT-RED
+	
+	set policy-options policy-statement EXPORT-RED term 1 from protocol bgp
+	set policy-options policy-statement EXPORT-RED term 1 then community add RED
+	set policy-options policy-statement EXPORT-RED term 1 then accept
+	set policy-options policy-statement EXPORT-RED term 100 then reject
+
+	set policy-options policy-statement IMPORT-RED term 1 from protocol bgp
+	set policy-options policy-statement IMPORT-RED term 1 then community add RED
+	set policy-options policy-statement IMPORT-RED term 1 then accept
+	set policy-options policy-statement IMPORT-RED term 100 then reject	
+		
+	set policy-options community RED members target:134732:1001
+	
+	
+	
+
+
+	
+	
