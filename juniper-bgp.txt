@@ -1,0 +1,220 @@
+
+
+ OSPF | IS-IS is communicated by Multicast-IP
+ BGP does communicate by TCP 
+
+ TCP connectivity	- Idle	- Connect  	- Active
+ BGP connectivity	- OpenSent - OpenConfirm	- Established
+
+---
+
+	show route hidden
+	show route protocol bgp terse
+	run show route advertising-protocol bgp 59.153.100.0
+	run show route receving-protocol bgp 103.217.108.0
+
+
+---BGP---------------------------------------------------------- 
+
+	set routing-options autonomous-system 134732
+	set routing-options router-id 59.153.100.1
+
+
+---Route/Reflector----------------------------------------------	
+
+	set protocols bgp group IBGP cluster 1.1.1.1			<--route-relector-server
+
+
+---Full Routes Import/Export------------------------------------	
+	
+	set policy-options policy-statement IPv4_FULL term 1 from protocol bgp 
+	set policy-options policy-statement IPv4_FULL term 1 from route-filter 0.0.0.0/0 upto /0-/24    		or prefix-lenth-range
+	set policy-options policy-statement IPv4_FULL term 1 then accept
+	set policy-options policy-statement IPv4_FULL term 100 reject
+
+	set policy-options policy-statement IPv4_FULL term 1 from protocol bgp 
+	set policy-options policy-statement IPv6_FULL term 1 route-filter ::/0 upto 0/-/48    			or prefix-lenth-range
+	set policy-options policy-statement IPv6_FULL term 1 then accept
+	set policy-options policy-statement IPv6_FULL term 100 reject
+
+
+---Routes Orgin-------------------------------------------------------
+
+	set routing-options rib inet6.0 static route ::/0 discard
+	set routing-options rib inet6.0 static route 2401:f40::/32 discard			<!--IPv6
+	
+	set routing-options static route 0.0.0.0/0 discard							<!--IPv4
+	set routing-options static route 59.153.100.0/22 discard
+	set routing-options static route 59.153.100.0/23 discard
+	set routing-options static route 59.153.102.0/23 discard
+	set routing-options static route 59.153.101.0/24 discard
+	set routing-options static route 59.153.102.0/24 discard
+	set routing-options static route 59.153.103.0/24 discard
+
+
+---BGP NextHopSelf/LocalPreference------------------------------------
+
+	<Note: LocalPreference uses the within an AS. it values are not transmitted accress eBGP.
+	<Note: NextHopSelf
+      
+    set policy-options policy-statement NEXT-HOP-SELF term 1 then next-hop-self
+    set protocol bgp group IBGP export NEXT-HOP-SELF
+
+	set policy-options policy-statement LEVEL3_IPv4_PRI_IN term 1 route-filter 0.0.0.0/0 exact
+	set policy-options policy-statement LEVEL3_IPv4_PRI_IN term 1 then local-preference add 300
+	set policy-options policy-statement LEVEL3_IPv4_PRI_IN term 1 then accept
+	set policy-options policy-statement LEVEL3_IPv4_PRI_IN term 100 reject
+	
+	set protocol bgp group EXT-PEERS neighbor 10.0.0.1 multihop 			<!--eBGP multihop
+	
+
+
+--AS-Path-Prepend------------------------------------------------------
+	
+	set policy-options policy-statement IIG_OUT_AS_PATH_PREPENT term 1 from route-filter 59.153.100.0/22 upto /24
+	set policy-options policy-statement IIG_OUT_AS_PATH_PREPENT term 1 then as-path-prepend "134732 134732 134732"
+	set policy-options policy-statement IIG_OUT_AS_PATH_PREPENT term 1 then accept
+	set policy-options policy-statement IIG_OUT_AS_PATH_PREPENT term 100 reject
+	
+
+	
+---eBGP Config---------------------------------------------------------	
+	
+    set protocol bgp group IIG_ONE set type external
+	set protocol bgp group IIG_ONE peer-as 10075
+	
+	set protocol bgp group IIG_ONE neighbor 10.0.0.2 local-address 10.0.0.1
+	set protocol bgp group IIG_ONE neighbor 10.0.0.2 description Primary
+	
+	set protocol bgp group IIG_ONE neighbor 20.0.0.2 local-address 20.0.0.1
+    set protocol bgp group IIG_ONE neighbor 10.0.0.2 description Secondary
+	
+	set protocol bgp group IIG_ONE neighbor 2401:a:b:c:: local-address 2401:a:b:c::1
+	set protocol bgp group IIG_ONE neighbor 2401:a:b:c:: description Primary/Secondary
+	
+	
+	
+---iBGP Config--------------------------------------------------------------------------
+	
+    set protocol bgp group IBGP set type internal
+	set protocol bgp group IBGP peer-as 10075
+	set protocol bgp group IBGP local-address 59.153.100.1
+	set protocol bgp group IBGP export NEXT-HOP-SELF
+
+	set protocol bgp group IBGP import <import-policy>
+	set protocol bgp group IBGP export <export-policy>
+	
+	set protocol bgp group IBGP neighbor 59.153.100.17 description DHN-POP
+	set protocol bgp group IBGP neighbor 59.153.100.18 description GR-POP
+	    
+	set protocol bgp group IBGP neighbor 2401:a:b:c::1
+	set protocol bgp group IBGP neighbor 2401:a:b:c::2
+	
+	
+---Remote-Private-AS/Peer-Prefix-Limit-----------------------------------------------------
+
+#dont config this at immediate router where customer is connected, it should be used at Internet-Core router.	
+	set protocol bgp group IIG_INTERNET remove-private
+	set protocol bgp group CUSTOMER family inet unicast prefix-limit maximum 10 teardown 8 idle-timeout 5
+	
+
+
+---RegEx-----------------------------------------------------------------------------------
+
+	set policy-options policy-statement ASPATH_ATTR term 1 from as-path AS-PATH-REG-EX
+	set policy-options policy-statement ASPATH_ATTR term 1 then accept
+	set policy-options policy-statement ASPATH_ATTR term 100 then reject
+
+	set policy-options as-path AS-PATH-REG-EX .*							<!--all allow AS
+	set policy-options as-path AS-PATH-REG-EX "134732 10075"				<!--extact AS path	
+	set policy-options as-path AS-PATH-REG-EX "10075* 134732*"				<!--unlimited repeat both 10075 / 134732
+	set policy-options as-path AS-PATH-REG-EX "(10075-20075)* 134732*"		<!--range as match
+	set policy-options as-path AS-PATH-REG-EX "134732{1,5} 10075{5}"		<!--as prepend range
+	set policy-options as-path AS-PATH-REG-EX "134732 .*"					<!--match first as 134732
+	set policy-options as-path AS-PATH-REG-EX ".*134732.*"					<!--any position 134732 will have allowed
+	
+	
+	
+---BGP-Community-----------------------------------------------------------------------------------
+	
+	set policy-options community IIG-ONE-PP-100 member 134732:100
+	set policy-options community IIG-ONE-PP-101 member 134732:101
+	set policy-options community IIG-ONE-PP-102 member 134732:102
+	set policy-options community IIG-ONE-PP-103 member 134732:103
+	set policy-options community IIG-ONE-PP-199 member 134732:199
+	
+	set policy-options community IIG-TWO-PP-200 member 134732:200
+	set policy-options community IIG-TWO-PP-201 member 134732:201
+	set policy-options community IIG-TWO-PP-202 member 134732:202
+	set policy-options community IIG-TWO-PP-203 member 134732:203
+	set policy-options community IIG-TWO-PP-299 member 134732:199
+	
+	
+	set policy-options policy-statement IIG-ONE-PREPEND term 1  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-ONE-PREPEND term 1  from community IIG-ONE-PP-100 			
+	set policy-options policy-statement IIG-ONE-PREPEND term 1  then accept
+	
+	set policy-options policy-statement IIG-ONE-PREPEND term 2  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-ONE-PREPEND term 2  from community IIG-ONE-PP-101
+	set policy-options policy-statement IIG-ONE-PREPEND term 2  from as-path-prepend 134732
+	set policy-options policy-statement IIG-ONE-PREPEND term 3  then accept	
+	
+	set policy-options policy-statement IIG-ONE-PREPEND term 3  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-ONE-PREPEND term 3  from community IIG-ONE-PP-102
+	set policy-options policy-statement IIG-ONE-PREPEND term 2  from as-path-prepend "134732 134732"
+	set policy-options policy-statement IIG-ONE-PREPEND term 3  then accept		
+	
+	set policy-options policy-statement IIG-ONE-PREPEND term 4  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-ONE-PREPEND term 4  from community IIG-ONE-PP-103
+	set policy-options policy-statement IIG-ONE-PREPEND term 4  from as-path-prepend "134732 134732 134732"
+	set policy-options policy-statement IIG-ONE-PREPEND term 4  then accept	
+
+	set policy-options policy-statement IIG-ONE-PREPEND term 5  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-ONE-PREPEND term 5  from community IIG-ONE-PP-199
+	set policy-options policy-statement IIG-ONE-PREPEND term 5  then reject		
+	
+	set policy-options policy-statement IIG-TWO-PREPEND then next policy  							<!-- used IIG-ONE-OUT
+	set protocol bgp group IIG_ONE export [IIG-ONE-PREPEND IIG-ONE-OUT]								<!-- multiple export is allowed
+
+	set policy-options policy-statement IIG-TWO-PREPEND term 7  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-TWO-PREPEND term 7  from community IIG-TWO-PP-200 
+	set policy-options policy-statement IIG-TWO-PREPEND term 7  then accept
+	
+	set policy-options policy-statement IIG-TWO-PREPEND term 8  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-TWO-PREPEND term 8  from community IIG-TWO-PP-201
+	set policy-options policy-statement IIG-TWO-PREPEND term 8  from as-path-prepend 134732
+	
+	set policy-options policy-statement IIG-TWO-PREPEND term 9  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-TWO-PREPEND term 9  from community IIG-TWO-PP-202
+	set policy-options policy-statement IIG-TWO-PREPEND term 9  from as-path-prepend "134732 134732"
+
+	set policy-options policy-statement IIG-TWO-PREPEND term 10  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-TWO-PREPEND term 10  from community IIG-TWO-PP-203
+	set policy-options policy-statement IIG-TWO-PREPEND term 10  from as-path-prepend "134732 134732 134732"
+	
+	set policy-options policy-statement IIG-TWO-PREPEND term 11  from protocol bgp					<!--can add specific route-filter after bgp
+	set policy-options policy-statement IIG-TWO-PREPEND term 11  from community IIG-TWO-PP-299
+	set policy-options policy-statement IIG-TWO-PREPEND term 11  then reject	
+
+	set policy-options policy-statement IIG-TWO-PREPEND then next policy  								<!-- used IIG-TWO-OUT
+	set protocol bgp group IIG_TWO export [IIG-TWO-PREPEND IIG-ONE-OUT] 								<!-- multiple export is allowed
+	
+	
+	
+---Route/Damping-----------------------------------------------------------------------------------
+
+#route dampening can be used to reduce the propagation of unstable routes throughout a network
+
+	set policy-options damping DONT_DAMPING disable
+	
+	set policy-options damping AGGRESSIVE_DAMPING half-life 30
+	set policy-options damping AGGRESSIVE_DAMPING reuse 200
+	set policy-options damping AGGRESSIVE_DAMPING suppress 1500
+	set policy-options damping AGGRESSIVE_DAMPING max-suppress 120
+	
+	set policy-options policy-statement IIG-ONE-IN	term 1 from route-filter 1.1.1.0/24 exact damping DONT_DAMPING
+	set policy-options policy-statement IIG-ONE-IN	term 1 from route-filter 2.2.2.0/24 exact damping DONT_DAMPING
+	set policy-options policy-statement IIG-ONE-IN	term 1 from route-filter 3.3.3.0/24 exact damping DONT_DAMPING
+	set policy-options policy-statement IIG-ONE-IN	term 1 from route-filter 4.4.4.0/24 exact damping DONT_DAMPING
+	set policy-options policy-statement IIG-ONE-IN	term 100 then damping AGGRESSIVE_DAMPING
+	

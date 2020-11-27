@@ -1,0 +1,48 @@
+
+---configure MPLS and LDP on PE and P routers--------------------------------------------------
+ 
+	set interface em0 unit 100 family mpls
+	set interface em0 unit 200 family mpls
+	set interface lo0 unit 0 family mpls
+or	
+	set protocol mpls interface em0.100
+	set protocol mpls interface em0.200
+	set protocol mpls interface lo0.0
+
+	set protocol ldp interface em0.100
+	set protocol ldp interface em0.200
+	set protocol ldp interface lo0.0
+	
+
+
+----enable MP-BGP VPNv4 address-family on PE/P routers------------------------------------------- 
+
+	set protocol bgp group iBGP family inet any					<--ipv4-unicast-multicast
+	set protocol bgp group iBGP family inet-vpn any				<--vpn4
+	
+
+
+---configure VRF instance on PE routers where customers is connected-----------------------------
+
+	set routing-instance RED instance-type forwarding
+	set routing-instance RED interface em0.100
+	set routing-instance RED route-distinguisher 134732:1001
+	set routing-instance RED route-target target:134732:1001
+	
+	set interface em0 unit 100 description CE-PE
+	set interface em0 unit 100 family inet address 10.0.0.1/30
+	set interface em0 unit 100 family inet6 address 2401:8d::1/126
+	
+	
+	
+---adding PE-CE eBGP neighbor in VRF on PE------------------------------------------------------
+
+	set routing-instance RED protocol bgp group PE-CE neighbor 10.0.0.2 description PE-CE
+	set routing-instance RED protocol bgp group PE-CE neighbor 10.0.0.2 local-neighbor 10.0.0.1
+	set routing-instance RED protocol bgp group PE-CE neighbor 10.0.0.2 peer-as 10075
+	
+	
+
+
+	
+	
