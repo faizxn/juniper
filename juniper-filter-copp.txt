@@ -1,0 +1,444 @@
+	#Juniper-MX-Firewall-CoPP#One#
+
+
+set firewall family inet filter protect-router-control-plane term first-frag from first-fragment
+set firewall family inet filter protect-router-control-plane term first-frag then count frag-discards
+set firewall family inet filter protect-router-control-plane term first-frag then log
+set firewall family inet filter protect-router-control-plane term first-frag then discard
+
+set firewall family inet filter protect-router-control-plane term next-frag from is-fragment
+set firewall family inet filter protect-router-control-plane term next-frag then count frag-discards
+set firewall family inet filter protect-router-control-plane term next-frag then log
+set firewall family inet filter protect-router-control-plane term next-frag then discard
+
+set firewall family inet filter protect-router-control-plane term icmp-allow from source-address 10.160.0.0/24
+set firewall family inet filter protect-router-control-plane term icmp-allow from source-address 10.160.1.0/24
+set firewall family inet filter protect-router-control-plane term icmp-allow from source-address 43.224.111.0/24
+set firewall family inet filter protect-router-control-plane term icmp-allow from source-address 103.43.148.0/24
+
+set firewall family inet filter protect-router-control-plane term icmp-allow from source-prefix-list v6-prefix
+set firewall family inet filter protect-router-control-plane term icmp-allow from protocol icmp
+set firewall family inet filter protect-router-control-plane term icmp-allow then policer 50MB
+set firewall family inet filter protect-router-control-plane term icmp-allow then accept
+
+set firewall family inet filter protect-router-control-plane term ntp-allow from source-address 114.130.13.6/32
+set firewall family inet filter protect-router-control-plane term ntp-allow from protocol udp
+set firewall family inet filter protect-router-control-plane term ntp-allow from port ntp
+set firewall family inet filter protect-router-control-plane term ntp-allow then accept
+
+set firewall family inet filter protect-router-control-plane term ntp-other-discard from protocol udp
+set firewall family inet filter protect-router-control-plane term ntp-other-discard from port ntp
+set firewall family inet filter protect-router-control-plane term ntp-other-discard then discard
+
+set firewall family inet filter protect-router-control-plane term snmp from source-address 103.43.148.149/32
+set firewall family inet filter protect-router-control-plane term snmp from protocol udp
+set firewall family inet filter protect-router-control-plane term snmp from destination-port snmp
+set firewall family inet filter protect-router-control-plane term snmp then accept
+
+set firewall family inet filter protect-router-control-plane term snmp-other from protocol udp
+set firewall family inet filter protect-router-control-plane term snmp-other from destination-port snmp
+set firewall family inet filter protect-router-control-plane term snmp-other then discard
+
+set firewall family inet filter protect-router-control-plane term dns from source-address 103.43.148.148/32
+set firewall family inet filter protect-router-control-plane term dns from source-address 8.8.8.8/32
+set firewall family inet filter protect-router-control-plane term dns from protocol udp
+set firewall family inet filter protect-router-control-plane term dns from destination-port domain
+set firewall family inet filter protect-router-control-plane term dns then accept
+
+set firewall family inet filter protect-router-control-plane term dns-other from protocol udp
+set firewall family inet filter protect-router-control-plane term dns-other from port domain
+set firewall family inet filter protect-router-control-plane term dns-other then discard
+
+set firewall family inet filter protect-router-control-plane term syslog from source-address 103.244.184.37/32
+set firewall family inet filter protect-router-control-plane term syslog from protocol udp
+set firewall family inet filter protect-router-control-plane term syslog from port 514
+set firewall family inet filter protect-router-control-plane term syslog then accept
+
+set firewall family inet filter protect-router-control-plane term ospf from protocol ospf
+set firewall family inet filter protect-router-control-plane term ospf then accept
+
+set firewall family inet filter protect-router-control-plane term bgp from source-address 103.43.148.0/24
+
+set firewall family inet filter protect-router-control-plane term bgp from protocol tcp
+set firewall family inet filter protect-router-control-plane term bgp from port bgp
+set firewall family inet filter protect-router-control-plane term bgp then accept
+
+set firewall family inet filter protect-router-control-plane term bgp-deny from protocol tcp
+set firewall family inet filter protect-router-control-plane term bgp-deny from port bgp
+set firewall family inet filter protect-router-control-plane term bgp-deny then discard
+
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS from source-prefix-list ROUTER-ACCESSLIST
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS from protocol tcp
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS from port telnet
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS then accept
+
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-telnet-deny from protocol tcp
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-telnet-deny from port telnet
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-telnet-deny then discard
+
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-ssh from source-prefix-list ROUTER-ACCESSLIST
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-ssh from protocol tcp
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-ssh from port ssh
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-ssh then accept
+
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-ssh-deny from protocol tcp
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-ssh-deny from port ssh
+set firewall family inet filter protect-router-control-plane term ROUTER-ACCESS-ssh-deny then discard
+
+set firewall family inet filter protect-router-control-plane term v6-bgp from source-prefix-list v6-neighbor
+set firewall family inet filter protect-router-control-plane term v6-bgp from protocol tcp
+set firewall family inet filter protect-router-control-plane term v6-bgp from port bgp
+set firewall family inet filter protect-router-control-plane term v6-bgp then accept
+
+set firewall family inet filter protect-router-control-plane term v6-bgp-deny from protocol tcp
+set firewall family inet filter protect-router-control-plane term v6-bgp-deny from port bgp
+set firewall family inet filter protect-router-control-plane term v6-bgp-deny then discard
+
+set firewall family inet filter protect-router-control-plane term icmp-reject from protocol icmp
+set firewall family inet filter protect-router-control-plane term icmp-reject from icmp-type echo-request
+set firewall family inet filter protect-router-control-plane term icmp-reject from icmp-type echo-reply
+set firewall family inet filter protect-router-control-plane term icmp-reject from icmp-type time-exceeded
+set firewall family inet filter protect-router-control-plane term icmp-reject from icmp-type unreachable
+set firewall family inet filter protect-router-control-plane term icmp-reject then discard
+
+set firewall family inet filter protect-router-control-plane term default-term then policer 10MB
+set firewall family inet filter protect-router-control-plane term default-term then count copp-exceptions
+set firewall family inet filter protect-router-control-plane term default-term then log
+set firewall family inet filter protect-router-control-plane term default-term then accept
+
+
+set firewall policer 50MB if-exceeding bandwidth-limit 50m
+set firewall policer 50MB if-exceeding burst-size-limit 512k
+set firewall policer 50MB then discard
+
+set firewall policer 10MB if-exceeding bandwidth-limit 10m
+set firewall policer 10MB if-exceeding burst-size-limit 512k
+set firewall policer 10MB then discard
+
+set policy-options prefix-list ROUTER-ACCESSLIST 27.54.150.0/24
+set policy-options prefix-list ROUTER-ACCESSLIST 103.12.236.0/24
+set policy-options prefix-list ROUTER-ACCESSLIST 103.43.148.0/24
+
+set policy-options prefix-list v6-neighbor 2402:8640:1::2/128
+set policy-options prefix-list v6-prefix 2407:0e80::/32
+
+
+
+
+
+---------------------------------------------		#Juniper-MX-Firewall-CoPP#Two#   ----------------------------------------
+
+
+
+
+
+
+set firewall filter FIREWALS term RAT from protocol udp
+set firewall filter FIREWALS term RAT from destination-port 2989
+set firewall filter FIREWALS term RAT then count RAT
+set firewall filter FIREWALS term RAT then log
+set firewall filter FIREWALS term RAT then discard
+
+set firewall filter FIREWALS term TheInvasor from protocol udp
+set firewall filter FIREWALS term TheInvasor from destination-port 3150
+set firewall filter FIREWALS term TheInvasor then count TheInvasor
+set firewall filter FIREWALS term TheInvasor then log
+set firewall filter FIREWALS term TheInvasor then discard
+
+set firewall filter FIREWALS term ScheduleAgent from protocol udp
+set firewall filter FIREWALS term ScheduleAgent from destination-port 6667
+set firewall filter FIREWALS term ScheduleAgent then count ScheduleAgent
+set firewall filter FIREWALS term ScheduleAgent then log
+set firewall filter FIREWALS term ScheduleAgent then discard
+
+set firewall filter FIREWALS term icmp-pipe from protocol udp
+set firewall filter FIREWALS term icmp-pipe from destination-port 12345
+set firewall filter FIREWALS term icmp-pipe then count icmp-pipe
+set firewall filter FIREWALS term icmp-pipe then log
+set firewall filter FIREWALS term icmp-pipe then discard
+
+set firewall filter FIREWALS term GabanBus from protocol udp
+set firewall filter FIREWALS term GabanBus from destination-port 12346
+set firewall filter FIREWALS term GabanBus then count GabanBus
+set firewall filter FIREWALS term GabanBus then log
+set firewall filter FIREWALS term GabanBus then discard
+
+set firewall filter FIREWALS term Stacheldraht from protocol udp
+set firewall filter FIREWALS term Stacheldraht from destination-port 16660
+set firewall filter FIREWALS term Stacheldraht then count Stacheldraht
+set firewall filter FIREWALS term Stacheldraht then log
+set firewall filter FIREWALS term Stacheldraht then discard
+
+set firewall filter FIREWALS term WhackJob from protocol udp
+set firewall filter FIREWALS term WhackJob from destination-port 20034
+set firewall filter FIREWALS term WhackJob then count WhackJob
+set firewall filter FIREWALS term WhackJob then log
+set firewall filter FIREWALS term WhackJob then discard
+
+set firewall filter FIREWALS term Lion from protocol udp
+set firewall filter FIREWALS term Lion from destination-port 33567
+set firewall filter FIREWALS term Lion then count Lion
+set firewall filter FIREWALS term Lion then log
+set firewall filter FIREWALS term Lion then discard
+
+set firewall filter FIREWALS term Chargen from protocol udp
+set firewall filter FIREWALS term Chargen from protocol tcp
+set firewall filter FIREWALS term Chargen from destination-port 19
+set firewall filter FIREWALS term Chargen then count Chargen
+set firewall filter FIREWALS term Chargen then log
+set firewall filter FIREWALS term Chargen then discard
+
+set firewall filter FIREWALS term discard-netbios from protocol udp
+set firewall filter FIREWALS term discard-netbios from protocol tcp
+set firewall filter FIREWALS term discard-netbios from destination-port 137
+set firewall filter FIREWALS term discard-netbios from destination-port 135-139
+set firewall filter FIREWALS term discard-netbios then count discard-netbios
+set firewall filter FIREWALS term discard-netbios then log
+set firewall filter FIREWALS term discard-netbios then discard
+
+set firewall filter FIREWALS term Blaster-SMB from protocol tcp
+set firewall filter FIREWALS term Blaster-SMB from destination-port 445
+set firewall filter FIREWALS term Blaster-SMB then count Blaster-SMB
+set firewall filter FIREWALS term Blaster-SMB then log
+set firewall filter FIREWALS term Blaster-SMB then discard
+
+set firewall filter FIREWALS term uSoft-RPC from protocol tcp
+set firewall filter FIREWALS term uSoft-RPC from destination-port 1025
+set firewall filter FIREWALS term uSoft-RPC then count uSoft-RPC
+set firewall filter FIREWALS term uSoft…
+
+set firewall family inet filter protect-rtr term first-frag from first-fragment
+set firewall family inet filter protect-rtr term first-frag then count frag-discards
+set firewall family inet filter protect-rtr term first-frag then log
+set firewall family inet filter protect-rtr term first-frag then discard
+
+set firewall family inet filter protect-rtr term next-frag from is-fragment
+set firewall family inet filter protect-rtr term next-frag then count frag-discards
+set firewall family inet filter protect-rtr term next-frag then log
+set firewall family inet filter protect-rtr term next-frag then discard
+
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit from protocol tcp
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit from port bgp
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit from port ntp
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit from port ssh
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit from port snmp
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit from port snmptrap
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit from port ftp
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit from port ftp-data
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit from tcp-flags "syn | fin | rst"
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit then policer TCP-SYN-Policer
+set firewall family inet filter protect-rtr term tcp-syn-fin-limit then log
+
+set firewall family inet filter protect-rtr term tcp-syn from protocol tcp
+set firewall family inet filter protect-rtr term tcp-syn from tcp-initial
+set firewall family inet filter protect-rtr term tcp-syn then syslog
+set firewall family inet filter protect-rtr term tcp-syn then accept
+
+set firewall family inet filter protect-rtr term ntp-allow from source-address 103.21.40.2/32
+set firewall family inet filter protect-rtr term ntp-allow from protocol udp
+set firewall family inet filter protect-rtr term ntp-allow from port ntp
+set firewall family inet filter protect-rtr term ntp-allow then accept
+
+set firewall family inet filter protect-rtr term ntp-other-discard from protocol udp
+set firewall family inet filter protect-rtr term ntp-other-discard from port ntp
+set firewall family inet filter protect-rtr term ntp-other-discard then discard
+
+set firewall family inet filter protect-rtr term snmp from source-address 202.86.222.202/32
+set firewall family inet filter protect-rtr term snmp from source-address 103.121.14.26/32
+set firewall family inet filter protect-rtr term snmp from protocol udp
+set firewall family inet filter protect-rtr term snmp from destination-port snmp
+set firewall family inet filter protect-rtr term snmp then accept
+
+set firewall family inet filter protect-rtr term snmp-other from protocol udp
+set firewall family inet filter protect-rtr term snmp-other from destination-port snmp
+set firewall family inet filter protect-rtr term snmp-other then discard
+
+set firewall family inet filter protect-rtr term dns from source-address 103.21.40.42/32
+set firewall family inet filter protect-rtr term dns from source-address 8.8.8.8/32
+set firewall family inet filter protect-rtr term dns from protocol udp
+set firewall family inet filter protect-rtr term dns from destination-port domain
+set firewall family inet filter protect-rtr term dns then accept
+
+set firewall family inet filter protect-rtr term dns-other from protocol udp
+set firewall family inet filter protect-rtr term dns-other from port domain
+set firewall family inet filter protect-rtr term dns-other then discard
+
+set firewall family inet filter protect-rtr term syslog from protocol udp
+set firewall family inet filter protect-rtr term syslog from port 514
+set firewall family inet filter protect-rtr term syslog then accept
+
+set firewall family inet filter protect-rtr term bgp from source-address 103.145.28.2/32
+set firewall family inet filter protect-rtr term bgp from source-address 172.16.11.2/32
+set firewall family inet filter protect-rtr term bgp from source-address 103.145.28.18/32
+set firewall family inet filter protect-rtr term bgp from source-address 103.145.28.114/32
+set firewall family inet filter protect-rtr term bgp from source-address 103.145.28.34/32
+set firewall family inet filter protect-rtr term bgp from source-address 103.145.28.98/32
+set firewall family inet filter protect-rtr term bgp from source-address 103.145.28.50/32
+set firewall family inet filter protect-rtr term bgp from source-address 103.145.28.66/32
+set firewall family inet filter protect-rtr term bgp from source-address 103.145.29.254/32
+set firewall family inet filter protect-rtr term bgp from source-address 157.119.184.97/32
+set firewall family inet filter protect-rtr term bgp from source-address 157.119.184.37/32
+set firewall family inet filter protect-rtr term bgp from source-address 157.119.186.121/32
+set firewall family inet filter protect-rtr term bgp from source-address 103.145.28.254/32
+set firewall family inet filter protect-rtr term bgp from source-address 172.17.2.2/32
+set firewall family inet filter protect-rtr term bgp from source-address 172.17.2.6/32
+set firewall family inet filter protect-rtr term bgp from source-address 172.17.2.10/32
+set firewall family inet filter protect-rtr term bgp from source-address 172.17.2.14/32
+set firewall family inet filter protect-rtr term bgp from source-address 172.17.2.18/32
+set firewall family inet filter protect-rtr term bgp from source-address 172.17.2.22/32
+set firewall family inet filter protect-rtr term bgp from source-address 172.17.2.26/32
+set firewall family inet filter protect-rtr term bgp from source-address 172.17.2.30/32
+set firewall family inet filter protect-rtr term bgp from protocol tcp
+set firewall family inet filter protect-rtr term bgp from port bgp
+set firewall family inet filter protect-rtr term bgp then accept
+
+set firewall family inet filter protect-rtr term bgp-deny from protocol tcp
+set firewall family inet filter protect-rtr term bgp-deny from port bgp
+set firewall family inet filter protect-rtr term bgp-deny then discard
+
+set firewall family inet filter protect-rtr term ROUTER-ACCESS from source-prefix-list ROUTER-ACCESSLIST
+set firewall family inet filter protect-rtr term ROUTER-ACCESS from protocol tcp
+set firewall family inet filter protect-rtr term ROUTER-ACCESS from port telnet
+set firewall family inet filter protect-rtr term ROUTER-ACCESS then accept
+
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-telnet-deny from protocol tcp
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-telnet-deny from port telnet
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-telnet-deny then discard
+
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-ssh from source-prefix-list ROUTER-ACCESSLIST
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-ssh from protocol tcp
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-ssh from port ssh
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-ssh then accept
+
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-ssh-deny from protocol tcp
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-ssh-deny from port ssh
+set firewall family inet filter protect-rtr term ROUTER-ACCESS-ssh-deny then discard
+
+set firewall family inet filter protect-rtr term icmp-allow from protocol icmp
+set firewall family inet filter protect-rtr term icmp-allow then policer 50MB
+set firewall family inet filter protect-rtr term icmp-allow then accept
+
+set firewall family inet filter protect-rtr term ip-option-limit from ip-options any
+set firewall family inet filter protect-rtr term ip-option-limit then policer IP-OPT-Policer
+
+set firewall family inet filter protect-rtr term discard-ip-options from ip-options any
+set firewall family inet filter protect-rtr term discard-ip-options then count discard-ip-options
+set firewall family inet filter protect-rtr term discard-ip-options then log
+set firewall family inet filter protect-rtr term discard-ip-options then syslog
+set firewall family inet filter protect-rtr term discard-ip-options then discard
+
+set firewall family inet filter protect-rtr term discard-netbios from protocol udp
+set firewall family inet filter protect-rtr term discard-netbios from protocol tcp
+set firewall family inet filter protect-rtr term discard-netbios from destination-port 137
+set firewall family inet filter protect-rtr term discard-netbios from destination-port 135-139
+set firewall family inet filter protect-rtr term discard-netbios then count discard-netbios
+set firewall family inet filter protect-rtr term discard-netbios then log
+set firewall family inet filter protect-rtr term discard-netbios then syslog
+set firewall family inet filter protect-rtr term discard-netbios then discard
+
+set firewall family inet filter protect-rtr term discard-TTL_1-unknown from ttl 1
+set firewall family inet filter protect-rtr term discard-TTL_1-unknown then count discard-all-TTL_1-unknown
+set firewall family inet filter protect-rtr term discard-TTL_1-unknown then log
+set firewall family inet filter protect-rtr term discard-TTL_1-unknown then syslog
+set firewall family inet filter protect-rtr term discard-TTL_1-unknown then discard
+
+set firewall family inet filter protect-rtr term Chargen from protocol udp
+set firewall family inet filter protect-rtr term Chargen from protocol tcp
+set firewall family inet filter protect-rtr term Chargen from destination-port 19
+set firewall family inet filter protect-rtr term Chargen then count Chargen
+set firewall family inet filter protect-rtr term Chargen then log
+set firewall family inet filter protect-rtr term Chargen then discard
+
+set firewall family inet filter protect-rtr term Blaster-SMB from protocol tcp
+set firewall family inet filter protect-rtr term Blaster-SMB from destination-port 445
+set firewall family inet filter protect-rtr term Blaster-SMB then count Blaster-SMB
+set firewall family inet filter protect-rtr term Blaster-SMB then log
+set firewall family inet filter protect-rtr term Blaster-SMB then discard
+
+set firewall family inet filter protect-rtr term uSoft-RPC from protocol tcp
+set firewall family inet filter protect-rtr term uSoft-RPC from destination-port 1025
+set firewall family inet filter protect-rtr term uSoft-RPC then count uSoft-RPC
+set firewall family inet filter protect-rtr term uSoft-RPC then log
+set firewall family inet filter protect-rtr term uSoft-RPC then discard
+
+set firewall family inet filter protect-rtr term Redshell from protocol tcp
+set firewall family inet filter protect-rtr term Redshell from destination-port 1337
+set firewall family inet filter protect-rtr term Redshell then count Redshell
+set firewall family inet filter protect-rtr term Redshell then log
+set firewall family inet filter protect-rtr term Redshell then discard
+
+set firewall family inet filter protect-rtr term MSSQL-tcp from protocol tcp
+set firewall family inet filter protect-rtr term MSSQL-tcp from destination-port 1433
+set firewall family inet filter protect-rtr term MSSQL-tcp then count MSSQL-tcp
+set firewall family inet filter protect-rtr term MSSQL-tcp then log
+set firewall family inet filter protect-rtr term MSSQL-tcp then discard
+
+set firewall family inet filter protect-rtr term MSSQL-udp from protocol udp
+set firewall family inet filter protect-rtr term MSSQL-udp from destination-port 1434
+set firewall family inet filter protect-rtr term MSSQL-udp then count MSSQL-udp
+set firewall family inet filter protect-rtr term MSSQL-udp then log
+set firewall family inet filter protect-rtr term MSSQL-udp then discard
+
+set firewall family inet filter protect-rtr term Sun-NFS from protocol udp
+set firewall family inet filter protect-rtr term Sun-NFS from destination-port 2049
+set firewall family inet filter protect-rtr term Sun-NFS then count Sun-NFS
+set firewall family inet filter protect-rtr term Sun-NFS then log
+set firewall family inet filter protect-rtr term Sun-NFS then discard
+
+set firewall family inet filter protect-rtr term Blaster-worm from protocol tcp
+set firewall family inet filter protect-rtr term Blaster-worm from destination-port 2745
+set firewall family inet filter protect-rtr term Blaster-worm then count Blaster-worm
+set firewall family inet filter protect-rtr term Blaster-worm then log
+set firewall family inet filter protect-rtr term Blaster-worm then discard
+
+set firewall family inet filter protect-rtr term NessusD-backdoor from protocol tcp
+set firewall family inet filter protect-rtr term NessusD-backdoor from destination-port 3001
+set firewall family inet filter protect-rtr term NessusD-backdoor then count NessusD-backdoor
+set firewall family inet filter protect-rtr term NessusD-backdoor then log
+set firewall family inet filter protect-rtr term NessusD-backdoor then discard
+
+set firewall family inet filter protect-rtr term MyDoom-worm from protocol tcp
+set firewall family inet filter protect-rtr term MyDoom-worm from destination-port 3127
+set firewall family inet filter protect-rtr term MyDoom-worm from destination-port 3128
+set firewall family inet filter protect-rtr term MyDoom-worm then count MyDoom-worm
+set firewall family inet filter protect-rtr term MyDoom-worm then log
+set firewall family inet filter protect-rtr term MyDoom-worm then discard
+
+set firewall family inet filter protect-rtr term WindowsXP-UPnP from protocol tcp
+set firewall family inet filter protect-rtr term WindowsXP-UPnP from destination-port 5000
+set firewall family inet filter protect-rtr term WindowsXP-UPnP then count WindowsXP-UPnP
+set firewall family inet filter protect-rtr term WindowsXP-UPnP then log
+set firewall family inet filter protect-rtr term WindowsXP-UPnP then discard
+
+set firewall family inet filter protect-rtr term Dameware-backdoor from protocol tcp
+set firewall family inet filter protect-rtr term Dameware-backdoor from destination-port 6129
+set firewall family inet filter protect-rtr term Dameware-backdoor then count Dameware-backdoor
+set firewall family inet filter protect-rtr term Dameware-backdoor then log
+set firewall family inet filter protect-rtr term Dameware-backdoor then discard
+
+set firewall family inet filter protect-rtr term Memcached-exploit from protocol tcp
+set firewall family inet filter protect-rtr term Memcached-exploit from protocol udp
+set firewall family inet filter protect-rtr term Memcached-exploit from destination-port 11211
+set firewall family inet filter protect-rtr term Memcached-exploit then count Memcached-exploit
+set firewall family inet filter protect-rtr term Memcached-exploit then log
+set firewall family inet filter protect-rtr term Memcached-exploit then discard
+
+set firewall family inet filter protect-rtr term Dipnet-Oddbob from protocol tcp
+set firewall family inet filter protect-rtr term Dipnet-Oddbob from destination-port 11768
+set firewall family inet filter protect-rtr term Dipnet-Oddbob from destination-port 15118
+set firewall family inet filter protect-rtr term Dipnet-Oddbob then count Dipnet-Oddbob
+set firewall family inet filter protect-rtr term Dipnet-Oddbob then log
+set firewall family inet filter protect-rtr term Dipnet-Oddbob then discard
+
+set firewall family inet filter protect-rtr term DNS-Amplification from protocol udp
+set firewall family inet filter protect-rtr term DNS-Amplification from destination-port 389
+set firewall family inet filter protect-rtr term DNS-Amplification then count DNS-Amplification
+set firewall family inet filter protect-rtr term DNS-Amplification then log
+set firewall family inet filter protect-rtr term DNS-Amplification then discard
+
+set firewall family inet filter protect-rtr term default-term then policer 10MB
+set firewall family inet filter protect-rtr term default-term then count copp-exceptions
+set firewall family inet filter protect-rtr term default-term then log
+set firewall family inet filter protect-rtr term default-term then accept
+
+set interfaces lo0 unit 0 family inet filter input protect-rtr

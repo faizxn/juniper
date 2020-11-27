@@ -1,0 +1,83 @@
+
+
+---------------------------------------Config Interface------------------------------------------------------------
+
+	 interface,	by default interface allows multiple IP addresses on the interface. lowest IP addresses wins. 
+
+		use	<preferred> keyword for selecting the address.
+		use <primary> keyword at loopback address. if we have multiple loopback ip addresses.
+	
+	 static route- qualified-next-hop is used while having multiple next-hop, with differnet preferrence value.
+
+
+---------------------------------------Config RateLimit------------------------------------------------------------
+
+	set firewall policer 10MB if-exceeding bandwidth-limit 10m
+	set firewall policer 10MB if-exceeding burst-size-limit 1m
+	set firewall policer 10MB then discard
+	
+	set interfaces ex-5/3/3 unit 300 family inet policer input 10MB
+	set interfaces ex-5/3/3 unit 300 family inet policer output 10MB
+
+
+---------------------------------------Config LACP------------------------------------------------------------
+
+
+	set chassis aggregated-devices ethernet device-count 10
+	
+	set interfaces ae0 aggregated-ether-options minimum-links 2
+	set interfaces ae0 aggregated-ether-options link-speed 20g		
+	set interfaces ae0 aggregated-ether-options lacp active
+	
+	set interfaces xe-0/1/0 ether-options 802.3ad ae0
+	set interfaces xe-1/1/0 ether-options 802.3ad ae0		
+	
+	set interfaces ae0 unit 0 family inet address 59.153.100.1/24
+
+
+---------------------------------------Config Load Balancing------------------------------------------------------------
+
+
+	 set policy-options policy-statement LOAD-BALANCE-ALL then load-balance per-packet
+	 set routing-options forwarding-table export LOAD-BALANCE
+	
+	 set policy-options policy-statement LOAD-BALANCE-SPECIFIC from route-filter 10.0.0.0/24 extact
+	 set policy-options policy-statement LOAD-BALANCE-SPECIFIC from route-filter 20.0.0.0/24 extact 
+	 set policy-options policy-statement LOAD-BALANCE-SPECIFIC then accept
+	 set routing-options forwarding-table export LOAD-BALANCE-SPECIFIC
+	
+	 set forwarding-table hash-key family inet layer-3  			
+	 set forwarding-table hash-key family inet layer-4
+
+
+----------------------------------------Config PBR/Filter Based Forwarding-----------------------------------------------
+
+	 set firewall family inet filter MY-PBR term 1 from source-address 59.153.100.0/24
+	 set firewall family inet filter MY-PBR term 1 then routing-instance IIG-ONE
+	 set firewall family inet filter MY-PBR term 1 from source-address 59.153.100.0/24
+	 set firewall family inet filter MY-PBR term 1 then routing-instance IIG-ONE
+
+	 set firewall family inet filter MY-PBR term 10000 then accept						<!-- by default, firewall all discard, must allow for other prefix upload..
+	 set interfaces xe-5/3/0 unit 778 family inet filter input MY-PBR 					<!-- must apply at inbound direction of receving-routes..
+	
+	
+	------------ Creating Routing Instances
+	
+	 set routing-instance IIG-ONE instance-type forwarding-table
+	 set routing-instance IIG-ONE routing-options static route 0.0.0.0/0 next-hop 10.0.0.1
+	
+	 set routing-instance IIG-TWO instance-type forwarding-table
+	 set routing-instance IIG-TWO routing-options static route 0.0.0.0/0 next-hop 20.0.0.1
+	
+	------------ Creating RIB Group
+	
+	 set routing-options interface-routes rib-group inet MY-RIB-GROUP
+	 set routing-options rib-groups MY-RIB-GROUP import-rib inet.0
+	 set routing-options rib-groups MY-RIB-GROUP import-rib IIG-ONE.inet.0
+	 set routing-options rib-groups MY-RIB-GROUP import-rib IIG-TWO.inet.0
+	
+	
+	 run show route table IIG-ONE.inet.0
+	 run show route table IIG-TWO.inet.0
+	
+	
