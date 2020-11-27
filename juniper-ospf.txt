@@ -1,0 +1,107 @@
+
+
+	set interface lo0 unit 0 family inet address 1.1.1.1/32
+	set interface lo0 unit 0 family inet6 address 2401:a:b::/128
+	set interface lo0 unit 0 description Loopback
+	
+	run show ospf interface
+	run show ospf interface lo0.0 details 
+	
+	run show ospf neighbor
+	
+	set protocol ospf interface lo0.0 passive
+	set protocol ospf interface em0.100 interface-type p2p			<--state LAN means broadcast 
+	set protocol ospf interface em0.100 interface-type p2p
+	
+	run clear ospf neighbor area 0
+	run clear ospf neighbor 10.0.0.1
+	
+	
+<!--- P2P network type has no network database, It uses at LAN/Broadcast to select DR/BDR-----------------------
+ 
+ 
+	run show ospf database
+	run show ospf database network						-T2-route
+	run show ospf database router						-T1-route
+	run show ospf database netsummary/summary			-T3-route
+	run show ospf database external					-T4-route
+	
+	run show route 1.1.1.1/32 details
+	
+	run show ospf route 						<!-- show OSPF routes
+	run show ospf inter
+	run show ospf intra 
+	
+	run show ospf route 1.1.1.1/32 details
+	
+	
+	set interace em0.0 metric 10				 <!--- To set matrics at interface  
+	set protocol ospf area 0.0.0.0 inteface em0.1 authencation simple-password/md5
+	
+ 
+ 
+<!--- LSA Types-------------------------------------------------------------------------------------------------
+
+
+	T1-route (interface and intra-area )and T2-network (DR/BDR) exists within same area.
+	T3/4-summary (inter-area and p2p ip of that area) and also describe the location of ASBR
+	
+	
+	
+<!--- ASBR-routes export into OSPF domain----------------------------------------------------------------------
+
+
+	set protocol ospf export EXPORT_OSPF
+	set policy-options policy-statement EXPORT_OSPF term 1 from route-filter 0.0.0.0/0 exact
+	set policy-options policy-statement EXPORT_OSPF term 1 then accept 
+	set policy-options policy-statement EXPORT_OSPF term 1000 reject
+	
+	run show ospf route extern
+	
+
+<!---OSPFv3---------------------------------------------------------------------------------------------------
+	
+	
+	edit protocol ospf3 area 0.0.0.0
+	set inteface lo0.0 passive
+	set inteface em0.0 interface-type p22
+		
+	run show ospf3 neighbor
+	
+	
+<---Stub Area-------------------------------------------------------------------------------------------------
+	
+	
+	edit protocol ospf
+	set area 0.0.0.1 stub 									<!-- type-3 and default route will come from ABR
+	set area 0.0.0.1 stub defaul-metric 100					<!-- default ospf metic cost is 10 and redistribute is 150
+		
+	set area 0.0.0.1 stub defaul-metric 100 no-summaries 	
+				<!-- Not type-3/5 but only default route from ABR, not type-5/redistribution send from sutb area.
+	
+	
+	
+<---NSSA Area (also called type-7)----------------------------------------------------------------------------
+
+
+	set area 0.0.0.1 nssa default-lsa defaul-metric 100	
+				<!-- type-3 and default route will come from ABR, type-7/redistribution convert to type-5 and send other area. 
+																	 
+	set area 0.0.0.1 nssa no-summaries default-lsa defaul-metric 100
+				<!-- Not type-3/5 but only default route from ABR, type-7/redistribution convert to type-5 and send other area. 
+
+
+<---Summarizing Routes----------------------------------------------------------------------------
+	
+	
+	set protocol ospf area 0.0.0.1 nssa/srub area-range 209.165.100.0/22
+	
+	
+<---Virtual-Link ----------------------------------------------------------------------------
+	
+	set protocol ospf area 0.0.0.0 virtual-link neighbor 6.6.6.6 transit-area 0.0.0.1 		<!---ABR
+	set protocol ospf area 0.0.0.0 virtual-link neighbor 7.7.7.7 transit-area 0.0.0.1 		<!---ASBR
+	
+	
+	
+ 
