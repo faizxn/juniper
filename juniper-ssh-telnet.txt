@@ -1,0 +1,25 @@
+
+
+
+set firewall filter telnet-allowed  term 1 from source-prefiex-list telnet-prefiex-list
+set firewall filter telnet-allowed  term 1 from protocol tcp
+set firewall filter telnet-allowed  term 1 from destination-port
+set firewall filter telnet-allowed  term 1 then accept
+
+set firewall filter telnet-allowed  term 2 from protocol tcp
+set firewall filter telnet-allowed  term 2 from destination-port telnet 
+set firewall filter telnet-allowed  term 2 then discard
+
+set firewall filter telnet-allowed  term 1000 then accept
+
+set policy-options prefiex-list telnet-prefiex-list 10.0.0.0/24
+
+
+set interface lo0 unit 0 family inet address 59.153.100.1/32
+set interface lo0 unit 0 family inet filter input telnet-allowed
+
+
+
+
+
+
