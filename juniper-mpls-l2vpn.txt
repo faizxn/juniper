@@ -1,0 +1,76 @@
+
+
+---MPLS-L2VPN-P2P(BGP)--------------------------------------------------------------
+
+	set protocols bgp group IBGP family l2vpn signaling <!--must enable to all-PE-P routers
+	
+	set protocols l2vpn encapsulation-type ethernet-vlan
+	
+	set routing-instance L2VPN-A instance-type l2vpn
+	set routing-instance L2VPN-A interface em0.100
+	set routing-instance L2VPN-A route-distinguisher 134732:1001
+	set routing-instance L2VPN-A route-target target:134732:1001
+	
+	set routing-instance L2VPN-A protocols l2vpn encapsulation-type ethernet-vlan
+	set routing-instance L2VPN-A protocols l2vpn site CE-A site-identifier 1
+	set routing-instance L2VPN-A protocols l2vpn site CE-A interface em.100
+	
+	
+	set interface em0 vlan-tagging
+	set interface em0 unit 100 vlan-id 100
+	set interface em0 unit 100 encapsulation vlan-ccc
+	
+	set interface em0 unit 200 vlan-id 200
+	set interface em0 unit 200 encapsulation vlan-ccc
+
+
+---MPLS-L2VPN-P2P(LDP)-------------------------------------------------------------
+
+
+
+---MPLS-L2VPN-P2M(BGP-VPLS)-------------------------------------------------------------
+
+	set interface ge-1/01/1 vlan-tagging 							<!-- with VLAN
+	set interface ge-1/01/1 encapsulation vlan-vpls
+	set interface ge-1/01/1 unit 515 encapsulation vlan-vpls
+	set interface ge-1/01/1 unit 515 vlan-id 515
+	set interface ge-1/01/1 unit 515 family vpls
+	
+	
+	set interface ge-1/01/1 encapsulation vlan-vpls 				<!-- with WithOut VLAN
+	set interface ge-1/01/1 unit 0 family vpls
+	
+	
+	set routing-instance L2VPN-A instance-type l2vpn
+	set routing-instance L2VPN-A interface em0.100
+	set routing-instance L2VPN-A route-distinguisher 134732:1001
+	set routing-instance L2VPN-A route-target target:134732:1001
+	
+	set routing-instance L2VPN-A protocols l2vpn encapsulation-type ethernet-vlan
+	set routing-instance L2VPN-A protocols l2vpn site CE-A site-identifier 1
+	set routing-instance L2VPN-A protocols l2vpn site CE-A interface em.100
+	
+	set routing-options route-distinguisher-id	<loopback-id>		<--if specific route-distinguisher is not mentioned in instace, then it will use.
+	
+	
+	set routing-instance L2VPN-A instance-type vpls
+	set routing-instance L2VPN-A interface em0.100
+
+	set routing-instance L2VPN-A protocols vpls vpls-id 100
+	set routing-instance L2VPN-A protocols vpls neighbor 59.153.100.11
+	set routing-instance L2VPN-A protocols vpls neighbor 59.153.100.12
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
