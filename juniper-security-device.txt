@@ -1,0 +1,96 @@
+
+
+	# run show security zones	
+	# set routing-options static route 0/0 next-hop 59.153.100.1
+
+
+<!---create security zone-----------------------------------------------------------------------------------
+
+	# set security zones security-zone TRUST description LAN
+	# set security zones security-zone TRUST tcp-rst
+	# set security zones security-zone TRUST host-inbound-traffic system-services all
+	# set security zones security-zone TRUST host-inbound-traffic protocols all
+	# set security zones security-zone TRUST interfaces GE-0/0/1.0
+
+	# set security zones security-zone UNTRUST description WAN
+	# set security zones security-zone UNTRUST host-inbound-traffic system-services all
+	# set security zones security-zone UNTRUST host-inbound-traffic protocols all
+	# set security zones security-zone UNTRUST interfaces GE-0/0/2.0
+
+
+<!---zone permission------------------------------------------------------------------------------------------
+
+(Trust2Trust)
+	# set security policies from-zone TRUST to-zone TRUST policy default-permit match source-address any 
+	# set security policies from-zone TRUST to-zone TRUST policy default-permit match destination-address any 
+	# set security policies from-zone TRUST to-zone TRUST policy default-permit match application any 
+	# set security policies from-zone TRUST to-zone TRUST policy default-permit then permit
+
+
+(Trust2UnTrust)
+	# set security policies from-zone TRUST to-zone UNTRUST policy default-permit match source-address any 
+	# set security policies from-zone TRUST to-zone UNTRUST policy default-permit match destination-address any 
+	# set security policies from-zone TRUST to-zone UNTRUST policy default-permit match application any 
+	# set security policies from-zone TRUST to-zone UNTRUST policy default-permit then permit
+
+
+(UnTrust2Trust)
+	# set security policies from-zone UNTRUST to-zone TRUST policy default-deny match source-address any 
+	# set security policies from-zone UNTRUST to-zone TRUST policy default-deny match destination-address any 
+	# set security policies from-zone UNTRUST to-zone TRUST policy default-deny match application any 
+	# set security policies from-zone UNTRUST to-zone TRUST policy default-deny then deny
+
+	
+<!---NAT---------------------------------------------------------------------------------------------------------------
+
+(STATIC-NAT)
+	# set security nat source rule-set NAT-TRUST-UNTRUST from zone TRUST
+	# set security nat source rule-set NAT-TRUST-UNTRUST to zone UNTRUST
+	# set security nat source rule-set NAT-TRUST-UNTRUST rule LAN-NAT match source-address/source-address-name LAN-10-0-0-0-24
+	# set security nat source rule-set NAT-TRUST-UNTRUST rule LAN-NAT then source-nat interface
+	
+	# set security address-book global address LAN-10-0-0-0-24 10.0.0.0/24
+	# set security address-book global address WAN-59-153-100-0-24 59.153.100.0/24
+	
+	# run show security flow session
+
+
+(STATIC-NAT-ONE2ONE)
+
+	# set interface int ge-0/0/1 unit 0 family inet address 59.153.100.1/24 primary
+	# set interface int ge-0/0/1 unit 0 family inet address 59.153.100.100/24	
+	# set interface int ge-0/0/1 unit 0 family inet address 59.153.100.200/24		
+	
+	# set security nat static rule-set SNAT-O2O from zone TRUST
+	# set security nat static rule-set SNAT-O2O rule 1 match static-nat prefix 10.0.0.1/32
+	# set security nat static rule-set SNAT-O2O rule 1 then destination-address 59.153.100.100/32	
+	or 
+	# set security nat static rule-set SNAT-O2O from zone UNTRUST
+	# set security nat static rule-set SNAT-O2O rule 1 match destination-address 59.153.100.100/32
+	# set security nat static rule-set SNAT-O2O rule 1 then static-nat prefix 10.0.0.1/32
+	
+(STATIC-NAT-MANY2MANY)
+
+	# set security nat static rule-set SNAT-M2M from zone TRUST	
+	# set security nat static rule-set SNAT-M2M rule 1 match static-nat prefix-name LAN-10-0-0-0-24	
+	# set security nat static rule-set SNAT-M2M rule 1 then destination-address-name WAN-59-153-100-0-24
+	
+	
+(SOURCE-NAT-ONE2MANY)
+	
+	# set security nat source pool SNAT-PUBLIC-IP address 59.153.100.100/32
+
+																										(Using POOL overloading)
+	# set security nat source rule-set TRUST-2-UNTRUST from zone TRUST
+	# set security nat source rule-set TRUST-2-UNTRUST to zone UNTRUST
+	# set security nat source rule-set TRUST-2-UNTRUST rule 1 match source-address-name LAN-10-0-0-0-24
+	# set security nat source rule-set TRUST-2-UNTRUST rule 1 then source-nat pool SNAT-PUBLIC-IP				
+	
+																										(Using Interface overloading)	
+	# set security nat source rule-set TRUST-2-UNTRUST from zone TRUST
+	# set security nat source rule-set TRUST-2-UNTRUST to zone UNTRUST
+	# set security nat source rule-set TRUST-2-UNTRUST rule 1 match source-address-name LAN-10-0-0-0-24
+	# set security nat source rule-set TRUST-2-UNTRUST rule 1 then source-nat interface							
+
+		
+	
