@@ -1,0 +1,64 @@
+
+<!---multicast
+
+
+N.B:- server is called source (S), reciver is called gorup (G)
+
+	(S,G) > SSM source specific multicast
+	(*,G) > if there is multiple sources
+	
+
+	run show igmp interface
+	run show igmp group
+	
+	set chasis fpc 0 pic 0 tunnel-service bandwdith 1g		<!--for multicast packet tunnel, not user traffic.. 
+
+	set protocol pim interface ge-0/0/0 mode dense/sparse/sparse-dense
+	set protocol pim interface ge-0/0/1 mode dense/sparse/sparse-dense
+	run show pim interfaces
+	run show pim neighbors
+	run show pim join
+	run show multicast route
+
+	# set protocol igmp interface ge-0/0/1 version 2			<!--config igmp on reciver-end-router	
+
+	RP (auto and static) is created to manage reciver-group (G) to forward to source (S)
+
+static RP:-	
+	set protocols pim rp local address 1.1.1.1   				<!--this used at RP
+	set protocols pim rp static address 1.1.1.1					<!--this used at Non-RP
+	
+auto RP:-
+	set protocols pim rp local address 1.1.1.1
+	set protocols pim rp auto-rp mapping						<!--used to find another RP
+	set protocols pim rp auto-rp discovery						<!--this used at Non-RP
+	
+	
+msdp(multicast source discovery protocol):- used shared multicast traffic with external neighbors or provider.
+
+	set protocols msdp local-address 1.1.1.1
+	set protocols msdp group AS132267 peer 10.0.0.2
+
+	
+anycast-rp with anycast-pim config:-
+
+	set protocols pim rp local family inet address 1.1.1.1
+	set protocols pim rp local family inet anycast-pim rp-set address 2.2.2.2
+	set protocols pim rp local family inet anycast-pim rp-set address 3.3.3.3
+	set protocols pim rp local family inet anycast-pim rp-set address 4.4.4.4
+
+	set interfaces lo0 unit 0 family inet address 59.153.100.1 primary
+	set interfaces lo0 unit 0 family inet address 1.1.1.1
+	
+	
+	
+
+	
+	
+	
+	
+
+	
+	
+	
+	
