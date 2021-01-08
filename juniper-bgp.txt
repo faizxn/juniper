@@ -1,10 +1,12 @@
 
-
  OSPF | IS-IS is communicated by Multicast-IP
  BGP does communicate by TCP 
 
  TCP connectivity	- Idle	- Connect  	- Active
  BGP connectivity	- OpenSent - OpenConfirm	- Established
+
+<-next-policy not used in firewall, it usges at policy-statement.
+<-source-address must have to define, when connected point-2-point down. but destination/remote address ping is reachable via another/secondary link. it may hamper service.
 
 ---
 
@@ -232,4 +234,83 @@ or
 	set routing-options autonomous-system 132267 loops 10				<!--used at customer routers both b-end
 	
 	
+	
+----------------------------------------Config STATIC-PBR/Filter Based Forwarding-----------------------------------------------
+
+	 set firewall family inet filter MY-PBR term 1 from source-address 59.153.100.0/24
+	 set firewall family inet filter MY-PBR term 1 then routing-instance IIG-ONE
+	 set firewall family inet filter MY-PBR term 1 from source-address 59.153.100.0/24
+	 set firewall family inet filter MY-PBR term 1 then routing-instance IIG-ONE
+
+	 set firewall family inet filter MY-PBR term 10000 then accept				<!-- by default, firewall all discard, must allow for other prefix upload..
+	 set interfaces xe-5/3/0 unit 778 family inet filter input MY-PBR 			<!-- must apply at inbound direction of receving-routes..
+	
+	
+#Creating Routing Instances
+	
+	 set routing-instance IIG-ONE instance-type forwarding-table
+	 set routing-instance IIG-ONE routing-options static route 0.0.0.0/0 next-hop 10.0.0.1
+	
+	 set routing-instance IIG-TWO instance-type forwarding-table
+	 set routing-instance IIG-TWO routing-options static route 0.0.0.0/0 next-hop 20.0.0.1
+	
+#Creating RIB Group
+	
+	 set routing-options interface-routes rib-group inet MY-RIB-GROUP
+	 set routing-options rib-groups MY-RIB-GROUP import-rib inet.0
+	 set routing-options rib-groups MY-RIB-GROUP import-rib IIG-ONE.inet.0
+	 set routing-options rib-groups MY-RIB-GROUP import-rib IIG-TWO.inet.0
+	
+	
+	 run show route table IIG-ONE.inet.0
+	 run show route table IIG-TWO.inet.0	
+	
+
+-----------------------------------------------BGP-DYNAMIC-PBR---------------------------------------------------------- 
+
+<-aboue config is good for direct R2R peering, if switch is used then follow next as ip-sla.
+<-pbr filter apply on provider-ingress router. 
+
+	set interface xe-4/3/3 unit 300 family inet filter input IIG_PBR
+
+	set firewall filter IIG_PBR term pbr from source-address 59.153.100.0/24
+	set firewall filter IIG_PBR term pbr from source-address 59.153.100.0/24
+	set firewall filter IIG_PBR term pbr then next-ip 43.224.13.1						<-PrimaryLink
+	set firewall filter IIG_PBR term pbr from source-address 59.153.100.0/24
+	set firewall filter IIG_PBR term pbr from source-address 59.153.100.0/24
+	set firewall filter IIG_PBR term pbr then next-ip 103.248.12.1						<-SecondaryLink	
+	set firewall filter IIG_PBR term default then accept
+
+
+	set services rpm probe PRI-SEC test PRI-SEC-LINK probe-type icmp-ping
+	set services rpm probe PRI-SEC test PRI-SEC-LINK target 43.224.148.1
+	set services rpm probe PRI-SEC test PRI-SEC-LINK source-address 43.224.148.2
+	set services rpm probe PRI-SEC test PRI-SEC-LINK probe-count 3
+	set services rpm probe PRI-SEC test PRI-SEC-LINK probe-interval 5
+	
+	
+	set event-options policy PRI-SEC-EO event ping_test_failed
+	set event-options policy PRI-SEC-EO within 60 trigger on
+	set event-options policy PRI-SEC-EO within 60 trigger 5	
+	set event-options policy PRI-SEC-EO within 65 trigger until	
+	set event-options policy PRI-SEC-EO within 65 trigger 5
+	set event-options policy PRI-SEC-EO attributes-match ping_test_failed.test-owner matches PRI-SEC
+	set event-options policy PRI-SEC-EO attributes-match ping_test_failed.test-name matches PRI-SEC-LINK
+	set event-options policy PRI-SEC-EO attributes-match then change-configuration commads "deactive firewall filter IIG_PBR term pbr"
+	set event-options policy PRI-SEC-EO attributes-match then change-configuration user-name support
+	set event-options policy PRI-SEC-EO attributes-match then change-configuration commit-options log "commit from event"
+
+
+	set event-options policy SEC-PRI-EO event ping_test_completed
+	set event-options policy SEC-PRI-EO within 60 trigger on
+	set event-options policy SEC-PRI-EO within 60 trigger 5	
+	set event-options policy SEC-PRI-EO within 65 trigger until	
+	set event-options policy SEC-PRI-EO within 65 trigger 5
+	set event-options policy SEC-PRI-EO attributes-match ping_test_completed.test-owner matches PRI-SEC
+	set event-options policy SEC-PRI-EO attributes-match ping_test_completed.test-name matches PRI-SEC-LINK
+	set event-options policy SEC-PRI-EO attributes-match then change-configuration commads "active firewall filter IIG_PBR term pbr"
+	set event-options policy SEC-PRI-EO attributes-match then change-configuration user-name support
+	set event-options policy SEC-PRI-EO attributes-match then change-configuration commit-options log "commit from event"
+	
+
 	
