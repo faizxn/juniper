@@ -94,36 +94,5 @@
 	
 	 set forwarding-table hash-key family inet layer-3  			
 	 set forwarding-table hash-key family inet layer-4
-
-
-----------------------------------------Config PBR/Filter Based Forwarding-----------------------------------------------
-
-	 set firewall family inet filter MY-PBR term 1 from source-address 59.153.100.0/24
-	 set firewall family inet filter MY-PBR term 1 then routing-instance IIG-ONE
-	 set firewall family inet filter MY-PBR term 1 from source-address 59.153.100.0/24
-	 set firewall family inet filter MY-PBR term 1 then routing-instance IIG-ONE
-
-	 set firewall family inet filter MY-PBR term 10000 then accept						<!-- by default, firewall all discard, must allow for other prefix upload..
-	 set interfaces xe-5/3/0 unit 778 family inet filter input MY-PBR 					<!-- must apply at inbound direction of receving-routes..
-	
-	
-	------------ Creating Routing Instances
-	
-	 set routing-instance IIG-ONE instance-type forwarding-table
-	 set routing-instance IIG-ONE routing-options static route 0.0.0.0/0 next-hop 10.0.0.1
-	
-	 set routing-instance IIG-TWO instance-type forwarding-table
-	 set routing-instance IIG-TWO routing-options static route 0.0.0.0/0 next-hop 20.0.0.1
-	
-	------------ Creating RIB Group
-	
-	 set routing-options interface-routes rib-group inet MY-RIB-GROUP
-	 set routing-options rib-groups MY-RIB-GROUP import-rib inet.0
-	 set routing-options rib-groups MY-RIB-GROUP import-rib IIG-ONE.inet.0
-	 set routing-options rib-groups MY-RIB-GROUP import-rib IIG-TWO.inet.0
-	
-	
-	 run show route table IIG-ONE.inet.0
-	 run show route table IIG-TWO.inet.0
-	
-	
+	 
+-----------------------------------------------------------------------------------------------------------------------------
