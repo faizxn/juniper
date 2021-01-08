@@ -10,6 +10,52 @@
 	 static route- qualified-next-hop is used while having multiple next-hop, with differnet preferrence value.
 
 
+---------------------------------------Config CoS------------------------------------------------------------
+
+ # run show class-of-services forwarding-classes
+ 
+	best-effort			0 (less-priority)
+	expedidted-forwarding		1
+	assured-forwarding		2
+	network-control			3 (highest-priority)	
+	
+
+# define COS class	
+
+  	set class-of-services forwarding-classes class CLASS-NETWORK-CONTROL queue-num 7
+  	set class-of-services forwarding-classes class CLASS-VOICE queue-num 6
+  	set class-of-services forwarding-classes class CLASS-VIDEO queue-num 5
+
+  or
+
+  	set firewall firewall CLASS-VOICE term voice from protocol udp
+  	set firewall firewall CLASS-VOICE term voice from protocol tcp
+  	set firewall firewall CLASS-VOICE term voice from port 5060
+  	set firewall firewall CLASS-VOICE term voice then forwarding-class expedidted-forwarding
+  	set firewall firewall CLASS-VOICE term voice then accept
+
+  	set firewall firewall CLASS-VOICE term support-rtp from protocol udp
+  	set firewall firewall CLASS-VOICE term support-rtp from protocol port 16384-32767
+  	set firewall firewall CLASS-VOICE term support-rtp then forwarding-class expedidted-forwarding  
+  	set firewall firewall CLASS-VOICE term support-rtp then accept
+  
+  	set firewall firewall CLASS-VOICE term default then accept
+  
+
+
+<!--input for single-filter-rule /input-list for multiple filter-rules  
+  	set interface xe-4/3/3 unit 0 family inet filter input-list CLASS-VOICE CLASS-VIDEO    
+
+
+# ICMP proritize during congestion
+
+ 	set firewall filter ICMP term icmp from protocol icmp
+ 	set firewall filter ICMP term icmp then forwarding-class network-control
+ 	set firewall filter ICMP term icmp then accept
+ 	set firewall filter ICMP term default then accept
+ 
+
+
 ---------------------------------------Config RateLimit------------------------------------------------------------
 
 	set firewall policer 10MB if-exceeding bandwidth-limit 10m
