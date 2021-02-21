@@ -8,9 +8,11 @@
 
 set interfaces xe-0/0/0 vlan-tagging
 set interfaces xe-0/0/0 unit 300 vlan-id 300
+set interfaces xe-0/0/0 unit 300 family inet no-redirect
 set interfaces xe-0/0/0 unit 300 description <interface-description>
 set interfaces xe-0/0/0 unit 300 family inet address 10.0.0.1/30
 set interfaces xe-0/0/0 unit 300 family inet6 address 2401:abc:5::121/126
+
 
 
 # show | display set | match vlan
