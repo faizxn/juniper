@@ -1,0 +1,40 @@
+
+
+
+
+# set system login user faiz class super-user authentication plain-text-password ****
+# set system root-authentication plain-text-password *****
+
+
+set interfaces xe-0/0/0 vlan-tagging
+set interfaces xe-0/0/0 unit 300 vlan-id 300
+set interfaces xe-0/0/0 unit 300 description <interface-description>
+set interfaces xe-0/0/0 unit 300 family inet address 10.0.0.1/30
+set interfaces xe-0/0/0 unit 300 family inet6 address 2401:abc:5::121/126
+
+
+# show | display set | match vlan
+
+# run show chassis hardware
+# run show route forwarding-table
+
+# run show route table inet.0	<!-- ipv4
+# run show route table inet.6   <!-- ipv6
+
+
+# run show route receive-protocol bgp 10.0.0.1
+# run show route advertising-protocol bgp 10.0.0.1
+
+
+# run show route protocol bgp terse
+# run show route protocol ospf
+
+
+
+
+
+
+
+
+
+
