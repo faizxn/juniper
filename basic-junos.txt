@@ -15,7 +15,7 @@ set interfaces xe-0/0/0 unit 300 family inet6 address 2401:abc:5::121/126
 
 
 
-# show | display set | match vlan
+# show | display set | match <match-string-name-in-router-its case-sensitive>
 
 # run show chassis hardware
 # run show route forwarding-table
