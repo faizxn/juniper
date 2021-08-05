@@ -1,0 +1,96 @@
+
+
+
+  + show interfaces terse
+  + show vlans
+  + show ethernet-switching table												|| show mac-table
+  + show interfaces ge-0/0/1 extensive
+  
+  + set ethernet-switching-options interfaces xe-0/0/0.0 no-mac-learning		|| if we dont wish to learn mac on interface
+  + set switching-options mac-table-aging-time 600 								|| global mode mac aging-time (default is 300)
+  + set vlan default mac-table-aging-time 600									|| vlan mode mac aging-time (default is 300)
+  
+  + show pfe next-hop										
+
+ 
+  ##INTERFACE-RANGE-CONFIG##
+  
+  + set interfaces interface-range rangelist member ge-0/0/1
+  + set interfaces interface-range rangelist member ge-0/0/2
+  + set interfaces interface-range rangelist member-range ge-0/0/5 to ge-0/0/6
+  
+  + set interfaces interface-range rangelist unit 0 family ethernet-switching
+  
+  
+  ##SET-STATIC-MAC-2-PORTS##
+  
+  + set static vlan default mac 0000:0000:0000 next-hop ge-0/0/1
+  + show ethernet-switching table										
+ 
+  
+  
+  ##VLAN##
+  
+  + set vlans v10 vlan-id 10
+  + set sales-vlan description “V10”  
+
+  + set vlans v20 vlan-id 20
+  + set sales-vlan description “V20”
+  + show vlans
+  
+  + set interfaces ge-0/0/1 unit 0 family ethernet-switching port-mode access		|| access
+  + set interfaces ge-0/0/1 unit 0 family ethernet-switching vlan members v10
+  
+  + set interfaces ge-0/0/1 unit 0 family ethernet-switching port-mode trunk		|| trunk
+  + set interfaces ge-0/0/1 unit 0 family ethernet-switching vlan members v10
+  + set interfaces ge-0/0/1 unit 0 family ethernet-switching vlan members v20
+  + show vlans
+  
+  
+  
+  ##MANAGEMENT-VLAN##
+
+  + set vlans mgt-vlan vlan-id 300
+  + set interfaces ge-0/0/1 unit 0 family ethernet-switching port-mode trunk		|| managemet-vlan
+  + set interfaces ge-0/0/1 unit 0 family ethernet-switching vlan members mgt-vlan
+  
+  + set interfaces vlan unit 300 family inet address 10.0.0.100/24
+  + set vlans mgt-vlan l3-interface vlan.300
+  + set routing-options static route 0.0.0.0/0 next-hop 10.0.0.1
+  
+  
+  ##STP/RSTP##
+  
+  + show spanning-tree bridge			(default is STP)
+  
+  + delete protocols stp
+  + set protocols rstp
+  
+  + show spanning-tree bridge
+  + show spanning-tree interface
+  + show spanning-tree statistics interface
+  
+  + set protocols bridge-priority 4k
+  + set protocols rstp interface xe-0/0/1.0 cost 1000
+  + set protocols rstp interface xe-0/0/1.0 mode point-to-point
+  + set protocols rstp interface xe-0/0/2.0 cost 100
+  + set protocols rstp interface xe-0/0/2.0 mode point-to-point
+
+  + show spanning-tree bridge
+  + show spanning-tree interface
+  + show spanning-tree statistics interface
+  
+  
+
+  
+ 
+  
+  
+  
+  
+  
+  
+  
+  
+ 
+ 
