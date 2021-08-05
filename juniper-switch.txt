@@ -19,7 +19,8 @@
   + set interfaces interface-range rangelist member ge-0/0/2
   + set interfaces interface-range rangelist member-range ge-0/0/5 to ge-0/0/6
   
-  + set interfaces interface-range rangelist unit 0 family ethernet-switching
+  + set interfaces interface-range rangelist unit 0 family ethernet-switching 
+  + set interfaces interface-range rangelist unit 0 family ethernet-switching strom-control defaults
   
   
   ##SET-STATIC-MAC-2-PORTS##
@@ -57,6 +58,8 @@
   + set interfaces vlan unit 300 family inet address 10.0.0.100/24
   + set vlans mgt-vlan l3-interface vlan.300
   + set routing-options static route 0.0.0.0/0 next-hop 10.0.0.1
+  
+  + show interfaces irb terse
   
   
   ##STP/RSTP##
