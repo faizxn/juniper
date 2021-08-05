@@ -65,7 +65,8 @@
   
   + delete protocols stp
   + set protocols rstp
-  
+  + set rstp interface all  
+
   + show spanning-tree bridge
   + show spanning-tree interface
   + show spanning-tree statistics interface
