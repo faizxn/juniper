@@ -30,12 +30,12 @@
 ---Full Routes Import/Export------------------------------------	
 	
 	set policy-options policy-statement IPv4_FULL term 1 from protocol bgp 
-	set policy-options policy-statement IPv4_FULL term 1 from route-filter 0.0.0.0/0 upto /0-/24    		or prefix-lenth-range
+	set policy-options policy-statement IPv4_FULL term 1 from route-filter 0.0.0.0/0 prefix-length-range /0-/24    		or prefix-lenth-range
 	set policy-options policy-statement IPv4_FULL term 1 then accept
 	set policy-options policy-statement IPv4_FULL term 100 reject
 
 	set policy-options policy-statement IPv4_FULL term 1 from protocol bgp 
-	set policy-options policy-statement IPv6_FULL term 1 route-filter ::/0 upto 0/-/48    			or prefix-lenth-range
+	set policy-options policy-statement IPv6_FULL term 1 route-filter ::/0 prefix-length-range 0/-/48    			or prefix-lenth-range
 	set policy-options policy-statement IPv6_FULL term 1 then accept
 	set policy-options policy-statement IPv6_FULL term 100 reject
 
