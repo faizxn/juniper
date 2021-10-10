@@ -79,6 +79,24 @@
 	set interfaces xe-1/1/0 ether-options 802.3ad ae0		
 	
 	set interfaces ae0 unit 0 family inet address 59.153.100.1/24
+	
+	
+	
+---------------------------------------Config BRIDGE------------------------------------------------------------
+	
+
+	set logical-systems GGC-RTR bridge-domains GGC-NODES-BRIDGE vlan-id 4080
+	set logical-systems GGC-RTR bridge-domains GGC-NODES-BRIDGE routing-interface irb.0
+
+	set logical-systems GGC-RTR  interfaces xe-3/1/0 unit 0 family bridge interface-mode access
+	set logical-systems GGC-RTR  interfaces xe-3/1/0 unit 0 family bridge vlan-id 4080
+	set logical-systems GGC-RTR  interfaces xe-3/1/1 unit 0 family bridge interface-mode access
+	set logical-systems GGC-RTR  interfaces xe-3/1/1 unit 0 family bridge vlan-id 4080
+	set logical-systems GGC-RTR  interfaces xe-3/1/2 unit 0 family bridge interface-mode access
+	set logical-systems GGC-RTR  interfaces xe-3/1/2 unit 0 family bridge vlan-id 4080
+
+	set logical-systems GGC-RTR  interfaces irb unit 0 family inet address 59.153.102.1/26
+
 
 
 ---------------------------------------Config Load Balancing------------------------------------------------------------
